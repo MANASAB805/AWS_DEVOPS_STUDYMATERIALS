@@ -1,0 +1,442 @@
+# 🚀 DevOps Interview Preparation – Scenario-Based Questions & Answers
+
+---
+
+# 🔹 AWS
+
+---
+
+## 1. Design a Highly Available EC2 Architecture Across Multiple AZs
+
+### Answer:
+
+To design a highly available architecture:
+
+- Deploy EC2 instances across **at least two Availability Zones**
+- Use an **Auto Scaling Group (ASG)** spanning multiple AZs
+- Place instances behind an **Application Load Balancer (ALB)**
+- Store static content in Amazon S3
+- Use Multi-AZ Amazon RDS for database
+- Use Amazon ElastiCache (Redis) for session management
+
+### Why This Works:
+- Removes single point of failure
+- Automatic instance replacement
+- Cross-AZ traffic distribution
+- Automatic database failover
+
+---
+
+## 2. Migrate a Running EC2 Instance to Another Region with Minimal Downtime
+
+### Answer:
+
+1. Create an AMI of the instance
+2. Copy AMI to target region
+3. Launch EC2 in new region
+4. Replicate application data (DB replication or rsync)
+5. Lower DNS TTL
+6. Perform final sync
+7. Update DNS to new region
+
+**Best Practice:** Use Blue/Green deployment to minimize downtime.
+
+---
+
+## 3. EC2 Not Reachable via SSH – Troubleshooting Steps
+
+### Answer:
+
+Check in order:
+
+- Instance running state
+- Security group allows port 22
+- NACL configuration
+- Correct key pair
+- Public IP attached
+- Route table configuration
+- Disk space availability
+- SSH service status
+
+Use SSM Session Manager if direct SSH fails.
+
+---
+
+## 4. Handling Unpredictable Traffic Spikes (Cost-Optimized)
+
+### Answer:
+
+- Use Target Tracking Scaling (e.g., CPU 60%)
+- Implement Step Scaling for sudden bursts
+- Enable Predictive Scaling (if patterns exist)
+- Use Warm Pools
+- Mixed instance types (On-Demand + Spot)
+
+Ensures high availability with cost control.
+
+---
+
+## 5. When is Scheduled Scaling More Appropriate?
+
+### Answer:
+
+Scheduled scaling is better when traffic is predictable:
+
+- Office-hour applications
+- Daily sales events
+- Batch processing jobs
+
+Pre-provisions capacity before traffic spike.
+
+---
+
+## 6. S3 Backup Bucket Becomes Unavailable – Recovery Strategy
+
+### Answer:
+
+- Check IAM and bucket policies
+- Verify regional outage
+- Restore using:
+  - Cross-Region Replication
+  - Versioning
+  - Glacier backups
+
+Best practice: Always enable versioning and CRR for critical data.
+
+---
+
+## 7. Auditing IAM Users & Roles for Compliance
+
+### Answer:
+
+Use:
+
+- IAM Credential Report
+- AWS Config
+- Access Analyzer
+- CloudTrail
+- IAM Access Advisor
+
+Check for:
+- Unused credentials
+- Over-permissioned roles
+- MFA compliance
+- Root account usage
+
+---
+
+## 8. Implementing Secure Cross-Account Access
+
+### Answer:
+
+1. Create IAM role in resource-owning account
+2. Add trust policy for partner account
+3. Attach least-privilege permissions
+4. Partner assumes role via STS
+5. Use External ID
+6. Restrict session duration
+
+Provides secure, temporary, auditable access.
+
+---
+
+## 9. Securing S3 Data in Transit and At Rest
+
+### Answer:
+
+**At Rest:**
+- Enable SSE-S3 or SSE-KMS
+
+**In Transit:**
+- Enforce HTTPS-only bucket policy
+
+Additional:
+- Enable logging
+- Use object lock if required
+
+---
+
+## 10. Securely Connect On-Premises to VPC
+
+### Answer:
+
+Options:
+
+- Site-to-Site VPN (IPSec)
+- AWS Direct Connect
+- Transit Gateway
+
+For High Availability:
+- Dual VPN tunnels
+- BGP routing
+- Redundant customer gateways
+
+---
+
+## 11. Secure Lambda Deployment Across Multiple Environments
+
+### Answer:
+
+- Separate AWS accounts (Dev/Test/Prod)
+- Apply least-privilege IAM roles
+- Store secrets in Secrets Manager
+- Deploy via CI/CD pipeline
+- Enable logging and monitoring
+- Restrict invocation permissions
+
+---
+
+# 🔹 Docker
+
+---
+
+## 1. Multi-Cloud Docker Deployment with Compliance
+
+### Answer:
+
+- Build image once
+- Store in private registry
+- Scan images (Trivy/Clair)
+- Enforce CIS benchmarks
+- Implement OPA policies
+- Encrypt secrets using Vault/KMS
+
+Ensures portability and security compliance.
+
+---
+
+## 2. Live-Patching Docker Host Without Downtime
+
+### Answer:
+
+- Use kernel live patch tools
+- In Kubernetes:
+  - Cordon node
+  - Drain workloads
+  - Patch host
+  - Rejoin node
+
+Use rolling upgrades to avoid downtime.
+
+---
+
+## 3. Troubleshooting Container DNS Failures
+
+### Answer:
+
+- Check /etc/resolv.conf
+- Inspect Docker daemon DNS settings
+- Verify CoreDNS health (if Kubernetes)
+- Check network policies
+- Test upstream DNS reachability
+
+---
+
+## 4. Enforcing Policy-as-Code for Docker Security
+
+### Answer:
+
+- Use Open Policy Agent (OPA)
+- Integrate image scanning in CI/CD
+- Block privileged containers
+- Enforce non-root container policy
+- Use admission controllers
+
+---
+
+# 🔹 Kubernetes
+
+---
+
+## 1. Ingress Controller Crashes Under Load
+
+### Answer:
+
+- Increase replicas
+- Enable HPA
+- Increase CPU/memory limits
+- Tune worker connections
+- Enable rate limiting
+
+Investigate logs before scaling.
+
+---
+
+## 2. Entire Kubernetes Region Goes Down
+
+### Answer:
+
+- Deploy multi-region clusters
+- Replicate databases
+- Use latency-based DNS routing
+- Maintain tested backups
+
+Failover traffic to healthy region.
+
+---
+
+## 3. All Pods Fail Readiness Checks
+
+### Answer:
+
+- Check health endpoints
+- Verify ConfigMap/Secret changes
+- Test database connectivity
+- Inspect recent deployments
+- Rollback if necessary
+
+---
+
+## 4. HPA Cannot Scale Fast Enough
+
+### Answer:
+
+- Increase max replicas
+- Reduce scale-up delay
+- Enable Cluster Autoscaler
+- Pre-scale during peak traffic
+
+---
+
+## 5. Node Hosting Critical Workload Crashes
+
+### Answer:
+
+- Kubernetes reschedules pods automatically
+- Use ReplicaSets
+- Configure PodDisruptionBudgets
+- Enable multi-AZ node groups
+- Use Cluster Autoscaler
+
+---
+
+## 6. Pod Stuck in ImagePullBackOff
+
+### Answer:
+
+- Verify image name and tag
+- Check registry credentials
+- Validate IAM permissions
+- Confirm network access to registry
+
+---
+
+# 🔹 Terraform
+
+---
+
+## 1. Terraform Apply Succeeded but Resources Misbehaving
+
+### Answer:
+
+- Run terraform plan
+- Compare state vs actual infrastructure
+- Identify drift
+- Enable debug logs
+- Fix configuration and reapply
+
+---
+
+## 2. Running Terraform Safely in CI/CD
+
+### Answer:
+
+- Use remote backend (S3 + DynamoDB lock)
+- Separate environments using workspaces
+- Enforce Plan → Approval → Apply workflow
+- Restrict IAM permissions
+
+---
+
+## 3. Managing Large Terraform State Files
+
+### Answer:
+
+- Split infrastructure into multiple state files
+- Separate networking, compute, and data layers
+- Use reusable modules
+- Remove unused resources
+
+---
+
+## 4. Provisioning Infrastructure in 10 AWS Regions
+
+### Answer:
+
+- Use provider aliases
+- Use reusable modules
+- Implement for_each for regions
+- Maintain centralized module repository
+
+---
+
+## 5. Optimizing Terraform Performance
+
+### Answer:
+
+- Reduce unnecessary data sources
+- Increase parallelism
+- Modularize infrastructure
+- Avoid frequent refresh
+
+---
+
+## 6. Production Deployment Failed Halfway – Recovery
+
+### Answer:
+
+1. Stop further changes
+2. Inspect Terraform state
+3. Import orphaned resources
+4. Re-run terraform plan
+5. Fix drift
+6. Roll forward instead of rollback
+
+Rolling forward prevents data loss and production downtime.
+
+---
+
+# 🔹 Prometheus & Grafana
+
+---
+
+## 1. Implement Kubernetes Cluster-Level Monitoring
+
+### Answer:
+
+- Deploy Prometheus using Helm
+- Install:
+  - kube-state-metrics
+  - node-exporter
+  - cAdvisor
+- Monitor CPU, memory, pod restarts, API latency
+- Visualize metrics in Grafana dashboards
+
+---
+
+## 2. Integrate Prometheus with Alertmanager & Slack
+
+### Answer:
+
+- Define alert rules in Prometheus
+- Configure Alertmanager routing
+- Add Slack webhook integration
+- Test alerts
+
+Flow:
+Prometheus → Alertmanager → Slack
+
+Ensures real-time operational visibility.
+
+---
+
+# 🎯 Interview Strategy Tip
+
+Always structure answers:
+
+1. Architecture
+2. High Availability
+3. Security
+4. Cost Optimization
+5. Monitoring
+6. Best Practices
